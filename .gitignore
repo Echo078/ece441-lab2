@@ -10,12 +10,6 @@ __pycache__/
 .idea/
 .DS_Store
 
-# Local recordings and generated data
-data/
-/*.csv
-/*.txt
-!/requirements.txt
-
 # Local secrets
 .env
 .env.*
