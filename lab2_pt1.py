@@ -46,7 +46,7 @@ def load_recording_file(fname):
     fname: string representing the name of the recording file to load
     """
     file_path = os.path.join(DATA_DIR, fname)
-    data_df = None  # TODO: your code here
+    data_df = pd.read_csv(file_path, skiprows = NUM_ROWS_TO_SKIP) # TODO: your code here
 
     utils.clean_eeg_dataframe(data_df)  # does some cleanup
     return data_df
@@ -59,10 +59,10 @@ def is_eeg(col_name):
     col_name: a string representing a column in the dataframe loaded using
     load_recording_file
     """
-    pass  # TODO: your code here
+    return col_name.startswith(EEG_CHANNEL_PREFIX)  # TODO: your code here
 
 
-def plot_eeg_data(data_df):
+def plot_eeg_data(data_df, output_name="sample_data_eeg.png"): #save png to folder
     """ Plots all EEG channel data found in the pandas dataframe
     <data_df>.
 
@@ -73,11 +73,24 @@ def plot_eeg_data(data_df):
         NUM_CHANNELS, 1, sharex='all', figsize=(15, 15)
     )
 
-    # iterates through columns in the dataframe
-    # TODO: your code here
+    # iterates through columns in the dataframe 
+    timestamps = data_df[TIMESTAMP_STR] # TODO: your code here
     for col_name in data_df.columns.values:
         # TODO: your code here
         # plot EEG channel 1 on the first subplot, and so on
+        if is_eeg(col_name):
+            channel_number = col_name.replace(EEG_CHANNEL_PREFIX, "")
+            subplot_index = int(channel_number)-1
+
+            ax[subplot_index].plot(
+                timestamps,
+                data_df[col_name],
+                color=EEG_CHANNEL_COLORS[channel_number],
+                label = f"EEG Channel {channel_number}"
+
+            )
+
+        pass
 
 
     # Adding title, legends, and axes labels
@@ -86,13 +99,34 @@ def plot_eeg_data(data_df):
     fig.subplots_adjust(top=0.95, bottom=0.05)
     plt.xlabel("Time (DD HH:MM:SS)", fontsize=20)
     fig.text(0.06, 0.5, 'Recorded Signal (uV)', va='center', rotation='vertical', fontsize=20)
+
+    # save .png to project folder, dpi=200 (clearity)
+    output_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        output_name
+    )
+    fig.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.show()
 
 
 if __name__ == "__main__":
-    data_df = load_recording_file("sample_data.txt")
+    recording_files = [
+        "openeye1.txt",
+        "openeye2.txt",
+        "openeye3.txt",
+        "closeeye1.txt",
+        "closeeye2.txt",
+        "closeeye3.txt"
+    ]
 
-    pd.set_option('display.max_columns', None)
-    print(data_df)
+    for file_name in recording_files:
+        recording_path = os.path.join("recordings", file_name)
+        data_df = load_recording_file(recording_path)
 
-    plot_eeg_data(data_df)
+        output_name = file_name.replace(".txt", "_eeg.png")
+
+        print(f"Recording: {file_name}")
+        print(f"Data shape: {data_df.shape}")
+        print(f"Duration: {len(data_df) / SAMPLE_RATE:.2f} seconds")
+
+        plot_eeg_data(data_df, output_name=output_name)
