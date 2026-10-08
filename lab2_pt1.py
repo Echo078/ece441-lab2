@@ -101,10 +101,13 @@ def plot_eeg_data(data_df, output_name="sample_data_eeg.png"): #save png to fold
     fig.text(0.06, 0.5, 'Recorded Signal (uV)', va='center', rotation='vertical', fontsize=20)
 
     # save .png to project folder, dpi=200 (clearity)
-    output_path = os.path.join(
+    output_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        output_name
+        "figures"
     )
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_path = os.path.join(output_dir, output_name)
     fig.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.show()
 
